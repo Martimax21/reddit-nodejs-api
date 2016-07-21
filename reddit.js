@@ -58,10 +58,11 @@ module.exports = function RedditAPI(conn) {
         }
       });
     },
-    createPost: function(post, callback) {
+    createPost: function(post, subredditId, callback) {
       conn.query(
-        'INSERT INTO posts (userId, title, url, createdAt) VALUES (?, ?, ?, ?)', [post.userId, post.title, post.url, new Date()],
+        'INSERT INTO posts (userId, title, url, createdAt, subredditId) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, new Date(), subredditId],
         function(err, result) {
+          console.log(result);
           if (err) {
             callback(err);
           }
@@ -71,7 +72,7 @@ module.exports = function RedditAPI(conn) {
             the post and send it to the caller!
             */
             conn.query(
-              'SELECT id,title,url,userId, createdAt, updatedAt FROM posts WHERE id = ?', [result.insertId],
+              'SELECT id,title,url,userId, createdAt, updatedAt, subredditId FROM posts WHERE id = ?', [result.insertId],
               function(err, result) {
                 if (err) {
                   callback(err);
@@ -95,11 +96,153 @@ module.exports = function RedditAPI(conn) {
       var offset = (options.page || 0) * limit;
       
       conn.query(`
-        SELECT id, title, url, userId, createdAt, updatedAt
-        FROM posts
-        ORDER BY createdAt DESC
+        SELECT p.id,
+          p.title AS postTitle, 
+          p.url AS postURL, 
+          p.userId AS postUserId, 
+          p.createdAt AS postCreatedAt, 
+          p.updatedAt AS postUpdatedAt, 
+          u.id AS userId, 
+          u.username, 
+          u.createdAt AS userCreatedAt, 
+          u.updatedAt AS userUpdatedAt,
+          s.id AS subId,
+          s.name,
+          s.description AS des,
+          s.createdAt AS subCreatedAt,
+          s.updatedAt AS subUpdatedAt
+        FROM posts p
+          JOIN users u ON p.userId=u.id
+          LEFT JOIN subreddits s ON p.subredditId = s.id
+        ORDER BY postCreatedAt DESC
         LIMIT ? OFFSET ?`
         , [limit, offset],
+        function(err, results) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            
+            var mappedResults = results.map(function(res){
+              return {
+                id: res.id,
+                title: res.postTitle,
+                url: res.postURL,
+                createdAt: res.postCreatedAt,
+                updatedAt: res.postUpdatedAt,
+                userId: res.userId,
+                user: {
+                  id: res.userId,
+                  username: res.username,
+                  createdAt: res.userCreatedAt,
+                  updatedAt: res.userUpdatedAt
+                },
+                subreddit: {
+                  id: res.subId,
+                  name: res.name,
+                  description: res.des,
+                  createdAt: res.subCreatedAt,
+                  updatedAt: res.subUpdatedAt
+                }
+              }
+            })
+            
+            callback(null, mappedResults);
+          }
+        }
+      );
+    },
+    getAllPostsForUser: function (userID, options, callback) {
+      if (!callback) {
+        callback = options;
+        options = {};
+      }
+      var userr = userID;
+      var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
+      var offset = (options.page || 0) * limit;
+      
+      conn.query(`
+        SELECT p.id,
+          p.title AS postTitle, 
+          p.url AS postURL, 
+          p.userId AS postUserId, 
+          p.createdAt AS postCreatedAt, 
+          p.updatedAt AS postUpdatedAt, 
+          u.id AS userId, 
+          u.username, 
+          u.createdAt AS userCreatedAt, 
+          u.updatedAt AS userUpdatedAt
+        FROM posts p
+          JOIN users u ON p.userId=u.id
+          WHERE userId = ?
+        ORDER BY postCreatedAt DESC
+        LIMIT ? OFFSET ?`
+        , [userr, limit, offset],
+        function(err, results) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            
+            var mappedResults = results.map(function(res){
+              return {
+                id: res.id,
+                title: res.postTitle,
+                url: res.postURL,
+                createdAt: res.postCreatedAt,
+                updatedAt: res.postUpdatedAt,
+                userId: res.userId,
+                user: {
+                id: res.userId,
+                username: res.username,
+                createdAt: res.userCreatedAt,
+                updatedAt: res.userUpdatedAt
+                  
+                }
+              }
+            })
+            
+            callback(null, mappedResults);
+          }
+        }
+      );
+    },
+    createSubreddit: function(sub, callback) {
+      conn.query(
+        'INSERT INTO subreddits (name, description, createdAt, updatedAt) VALUES (?, ?, ?, ?)', [sub.name, sub.description, new Date(), new Date()],
+        function(err, result) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            /*
+            Post inserted successfully. Let's use the result.insertId to retrieve
+            the post and send it to the caller!
+            */
+            conn.query(
+              'SELECT id, name, description, createdAt, updatedAt FROM subreddits WHERE id = ?', [result.insertId], 
+              function(err, result) {
+                if (err) {
+                  callback(err);
+                }
+                else {
+                  callback(null, result[0]);
+                }
+              }
+            );
+          }
+        }
+      );
+    },
+    getAllSubreddits: function(callback) {
+        conn.query(`
+        SELECT id,
+          name,
+          description,
+          createdAt,
+          updatedAt
+        FROM subreddits
+        ORDER BY createdAt DESC`, 
         function(err, results) {
           if (err) {
             callback(err);
@@ -110,5 +253,6 @@ module.exports = function RedditAPI(conn) {
         }
       );
     }
-  }
-}
+  };
+};
+

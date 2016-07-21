@@ -23,3 +23,13 @@ CREATE TABLE `posts` (
   KEY `userId` (`userId`),
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE posts ADD COLUMN subredditId INT;
+
+CREATE TABLE subreddits (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(30) NOT NULL UNIQUE,
+  description VARCHAR(200),
+  createdAt DATETIME NOT NULL,
+  updatedAt DATETIME NOT NULL
+);
