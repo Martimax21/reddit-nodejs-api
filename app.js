@@ -1,6 +1,8 @@
 //from reddit.js
 var reddit = require('./reddit');
 var mysql = require('mysql');
+var bodyParser = require('body-parser')
+
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root', // CHANGE THIS :)
@@ -12,6 +14,7 @@ var redditAPI = reddit(connection);
 var express = require('express');
 var app = express();
 // var operator, firstOperand, secondOperand, solution;
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/createContent', function(req, res) {
     // console.log('request', req.query);
@@ -28,9 +31,15 @@ app.get('/createContent', function(req, res) {
     </form>
     `);
 });
+
 app.post('/createContent', function(req, res) {
-    res.send("Thank you!")
+    // console.log(req.body)
+    var url = req.body.url;
+    var title = req.body.title;
+    res.send("Thanks for your post! URL: " + url + " Title: " + title);
 })
+
+
 
 
 /* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
