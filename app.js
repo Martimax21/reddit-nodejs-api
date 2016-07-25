@@ -1,44 +1,47 @@
+//from reddit.js
+var reddit = require('./reddit');
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root', // CHANGE THIS :)
+  password : '',
+  database: 'reddit'
+});
+var redditAPI = reddit(connection);
 // copied from expressjs workshop index.js file
-
 var express = require('express');
 var app = express();
-var operator, firstOperand, secondOperand, solution;
+// var operator, firstOperand, secondOperand, solution;
 
-app.get('/calculator/:operation', function (req, res) {
+app.get('/post', function(req, res) {
     // console.log('request', req.query);
-//   res.send(`<h1>Hello ${req.query.name}!</h1>`);
-    operator = req.params.operation;
-    firstOperand = req.query.num1;
-    secondOperand = req.query.num2;
-    
-    switch(operator) {
-    case "add":
-        solution = Number(firstOperand) + Number(secondOperand);
-        break;
-    case "sub":
-        solution = Number(firstOperand) - Number(secondOperand);
-        break;
-    case "mult":
-        solution = Number(firstOperand) * Number(secondOperand);
+    redditAPI.get5Posts({}, function(err, result) {
+        console.log(result);
         
-        break;
-    case "div":
-        solution = Number(firstOperand) / Number(secondOperand);
-    default:
-        console.log("whoops!");
-}
-    var finalResult = {
-        operator: operator,
-        firstOperand: firstOperand,
-        secondOperand: secondOperand,
-        solution: solution
-    };
-    res.send(finalResult);
-
+        function createLi(post){
+            return `
+            <li>
+                <p>Username: ${post.username} Post: ${post.postTitle}</p>
+            </li>
+            `;
+        }
+        
+        res.send(
+            `
+    <div id="contents">
+        <h1>5 Posts from User # ${result[0].userId}</h1>
+            <ul>
+                ${result.map(function(post){
+                    return createLi(post);
+                }).join("")}
+            </ul>
+    </div>
+`);
+    });
 });
 
-/* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
 
+/* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
 // Boilerplate code to start up the web server
 var server = app.listen(process.env.PORT, process.env.IP, function () {
   var host = server.address().address;
@@ -48,33 +51,38 @@ var server = app.listen(process.env.PORT, process.env.IP, function () {
 });
 
 
-/*Exercise 3: Operations
+/*Exercise 4: Retrieving data from our database
 
-Create a web server that can listen to requests for /calculator/:operation?num1
-=XX&num2=XX and respond with a JSON object that looks like the following. 
-For example, /op/add?num1=31&num2=11:
+Before doing this exercise, go back to your reddit clone MySQL database from the 
+CLI. Using a few INSERT statements, put up a few posts in the posts table. Have 
+at least 10-15 posts in there with various titles and urls. For the userId, set 
+it to 1. Also create a user with ID 1 and call him John Smith or something.
 
-{
-  "operator": "add",
-  "firstOperand": 31,
-  "secondOperand": 11,
-  "solution": 42
-}
-NOTE: query string parameters -- the part after the ? in a URL -- are different 
-conceptually from the request parameters, which are part of the path. For 
-example here you are asked to use :operation as request parameter. In express, 
-you do this by making your app.get('/op/:operation', ...). The : before operation 
-will tell Express that this is a request parameter. You can access it using the 
-request.params object instead of request.query which would be for the query 
-string. In general, while the query string is reserved for either optional 
-values or values that can vary wildly, we will use request parameters when 
-they can themselves represent a resource. Here, we are looking for the 
-calculator resource, and under it for the add "sub-resource". Of course this is 
-our own terminology and in general it's up to us to decide what our URL schema 
-represents.
+Once you have inserted a few posts in the database, it's now time to retrieve 
+the contents from our web server and display them to the user using an HTML 
+<ul> list with a bunch of <li>s.
 
-Your program should work for add,sub,mult,div and return the appropriate solution 
-in a JSON string. If operation is something other than these 4 values, you 
-should use res.status to send an appropriate error code. First, figure out the 
-category of error code you need to send, then find an appropriate code using 
-the provided link.*/
+Using something similar to your getHomepage function, or even directly the 
+function itself, retrieve the latest 5 posts by createdAt date, including the 
+username who created the content.
+
+Once you have the query, create an endpoint in your Express server which will 
+respond to GET requests to /posts. The Express server will use the MySQL query 
+function to retrieve the array of contents. Then, you should build a string of 
+HTML that you will send with the request.send function.
+
+
+<div id="contents">
+  <h1>List of contents</h1>
+  <ul class="contents-list">
+    <li class="content-item">
+      <h2 class="content-item__title">
+        <a href="http://the.post.url.value/">The content title</a>
+      </h2>
+      <p>Created by CONTENT AUTHOR USERNAME</p>
+    </li>
+    ... one <li> per content that your Sequelize query found
+  </ul>
+</div>
+
+*/
