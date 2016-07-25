@@ -235,8 +235,39 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
-    getSinglePost: function(postId, callback) {
+    get5Posts: function(options, callback) {
+      if (!callback) {
+        callback = options;
+        options = {};
+      }
+      // var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
+      // var offset = (options.page || 0) * 5;
 
+      conn.query(`
+        SELECT p.id,
+          p.title AS postTitle, 
+          p.url AS postURL, 
+          p.userId AS postUserId, 
+          p.createdAt AS postCreatedAt, 
+          p.updatedAt AS postUpdatedAt, 
+          u.id AS userId, 
+          u.username 
+        FROM posts p
+          JOIN users u ON p.userId=u.id
+          WHERE userId = 1
+        ORDER BY postCreatedAt DESC
+        LIMIT 5 OFFSET 5`, 
+        function(err, results) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            callback(null, results);
+          }
+        }
+      );
+    },
+    getSinglePost: function(postId, callback) {
       conn.query(`
         SELECT p.id,
           p.title AS postTitle, 

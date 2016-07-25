@@ -36,7 +36,18 @@ app.post('/createContent', function(req, res) {
     // console.log(req.body)
     var url = req.body.url;
     var title = req.body.title;
+    
+    redditAPI.createPost(
+    {userId: 1, title: title, url: url},6, function(err, post) {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(post);
+      }});
+    
     res.send("Thanks for your post! URL: " + url + " Title: " + title);
+    // res.redirect()
 })
 
 

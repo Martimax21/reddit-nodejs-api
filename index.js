@@ -22,15 +22,15 @@ var redditAPI = reddit(connection);
 //   console.log(JSON.stringify(result, null, 4))
 // })
 
-redditAPI.getAllPosts({},"Hotness ranking", function(err, result) {
-  console.log(JSON.stringify(result, null, 4))
-})
+// redditAPI.getAllPosts({},"Hotness ranking", function(err, result) {
+//   console.log(JSON.stringify(result, null, 4))
+// })
 
 
 
 // It's request time!
 // redditAPI.createUser({
-//   username: 'hello237343798',
+//   username: 'TD',
 //   password: 'xxx'
 // }, function(err, user) {
 //   if (err) {
@@ -38,8 +38,8 @@ redditAPI.getAllPosts({},"Hotness ranking", function(err, result) {
 //   }
 //   else {
 //     redditAPI.createPost({
-//       title: 'fav montreal restaurant!',
-//       url: 'https://www.reddit.com',
+//       title: 'Tonic Dev',
+//       url: 'https://www.tonicdev.com',
 //       userId: user.id,
 //     }, 6, function(err, post) {
 //       if (err) {
@@ -51,6 +51,15 @@ redditAPI.getAllPosts({},"Hotness ranking", function(err, result) {
 //     });
 //   }
 // });
+
+// redditAPI.createPost(
+//     {userId: 1, title: "https://www.hackernews.com", url: "https://www.hackernews.com"},6, function(err, post) {
+//       if (err) {
+//         console.log(err);
+//       }
+//       else {
+//         console.log(post);
+//       }});
 
 // redditAPI.createSubreddit({
 //   name: "halifax",
