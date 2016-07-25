@@ -14,19 +14,23 @@ var reddit = require('./reddit');
 var redditAPI = reddit(connection);
 
 
-redditAPI.getAllPosts(function(err, result) {
-  console.log(JSON.stringify(result, null, 4))
-})
+// redditAPI.getCommentsForPost(5, function(err, result) {
+//   console.log(JSON.stringify(result, null, 4));
+// })
 
 // redditAPI.getAllPostsForUser(3, {}, function(err, result) {
 //   console.log(JSON.stringify(result, null, 4))
 // })
 
+redditAPI.getAllPosts({},"Hotness ranking", function(err, result) {
+  console.log(JSON.stringify(result, null, 4))
+})
+
 
 
 // It's request time!
 // redditAPI.createUser({
-//   username: 'hello233437',
+//   username: 'hello237343798',
 //   password: 'xxx'
 // }, function(err, user) {
 //   if (err) {
@@ -60,8 +64,36 @@ redditAPI.getAllPosts(function(err, result) {
 //   }
 // });
 
+// redditAPI.createComment({
+//   text: "I've never been been to Sumac and I will never go. :)",
+//   userId: 3,
+//   postId: 5,
+//   parentId: 3
+// }, function(err, comment) {
+//   if (err) {
+//     console.log(err);
+//   }
+//   else {
+//     console.log(JSON.stringify(comment, null, 4))
+//   }
+// });
 
-// redditAPI.getAllSubreddits(function(err, result) {
+// redditAPI.createOrUpdateVote({
+//   userId: 7,
+//   postId: 1,
+//   vote: 1
+// }, function(err, vote) {
+//   if (err) {
+//     console.log(err);
+//     console.log(vote);
+//   }
+//   else {
+//     console.log(JSON.stringify(vote, null, 4))
+//   }
+// });
+
+
+// redditAPI.getSinglePost(5, function(err, result) {
 //     // console.log(result);
 //   console.log(JSON.stringify(result, null, 4));
 // })

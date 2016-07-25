@@ -33,3 +33,38 @@ CREATE TABLE subreddits (
   createdAt DATETIME NOT NULL,
   updatedAt DATETIME NOT NULL
 );
+
+INSERT into subreddits(name, description) VALUES ("Default","This is the value for the posts created early");
+
+INSERT into posts(subredditId) VALUES (10) 
+  WHERE subredditId IS NULL;
+  
+UPDATE posts
+  SET subredditId=10
+  WHERE subredditId IS NULL;
+  
+CREATE TABLE comments (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  text TEXT(10000), 
+  createdAt DATETIME NOT NULL,
+  updatedAt DATETIME,
+  userId INT,
+  postId INT,
+  parentId INT,
+  FOREIGN KEY (userId) REFERENCES users(id),
+  FOREIGN KEY (postId) REFERENCES posts(id),
+  FOREIGN KEY (parentId) REFERENCES comments(id)
+);
+
+//Ziad's version has foreign key on parentId (we didnt do that)
+
+//ALTER TABLE comments DROP comment_ibfk_1; (to drop foreign key)
+
+CREATE TABLE votes (
+  postId INT,
+  userId INT,
+  vote TINYINT,
+  PRIMARY KEY (userId, postId),
+  FOREIGN Key (postId) REFERENCES posts(id),
+  FOREIGN Key (userId) REFERENCES users(id)
+);

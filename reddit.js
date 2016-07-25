@@ -4,7 +4,7 @@ var HASH_ROUNDS = 10;
 module.exports = function RedditAPI(conn) {
   return {
     createUser: function(user, callback) {
-      
+
       // first we have to hash the password...
       bcrypt.hash(user.password, HASH_ROUNDS, function(err, hashedPassword) {
         if (err) {
@@ -48,7 +48,7 @@ module.exports = function RedditAPI(conn) {
                       3b. If the insert succeeds, re-fetch the user from the DB
                       4. If the re-fetch succeeds, return the object to the caller
                       */
-                        callback(null, result[0]);
+                      callback(null, result[0]);
                     }
                   }
                 );
@@ -62,7 +62,7 @@ module.exports = function RedditAPI(conn) {
       conn.query(
         'INSERT INTO posts (userId, title, url, createdAt, subredditId) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, new Date(), subredditId],
         function(err, result) {
-          console.log(result);
+          // console.log(result);
           if (err) {
             callback(err);
           }
@@ -86,7 +86,7 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
-    getAllPosts: function(options, callback) {
+    getAllPosts: function(options, sortingMethod, callback) {
       // In case we are called without an options parameter, shift all the parameters manually
       if (!callback) {
         callback = options;
@@ -94,7 +94,19 @@ module.exports = function RedditAPI(conn) {
       }
       var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
       var offset = (options.page || 0) * limit;
-      
+      if (sortingMethod === "Newest ranking") {
+        sortingMethod = 'postCreatedAt';
+      }
+      if (sortingMethod === "Top Ranking") {
+        sortingMethod = 'voteScore';
+      }
+      if (sortingMethod === "Controversial ranking") {
+        sortingMethod = 'controversialRanking';
+      }
+      if (sortingMethod === "Hotness ranking") {
+        sortingMethod = "SUM(v.vote)/(now() - p.createdAt)"
+      }
+
       conn.query(`
         SELECT p.id,
           p.title AS postTitle, 
@@ -110,20 +122,31 @@ module.exports = function RedditAPI(conn) {
           s.name,
           s.description AS des,
           s.createdAt AS subCreatedAt,
-          s.updatedAt AS subUpdatedAt
+          s.updatedAt AS subUpdatedAt,
+          SUM(v.vote) as voteScore,
+          SUM(v.vote)/(now() - p.createdAt) as hottest,
+          COUNT(*) as totalVotes,
+          SUM(IF(v.vote = 1, 1,0)) AS numUpVotes,
+          SUM(IF(v.vote = -1, 1,0)) AS numDownVotes,
+          CASE 
+            WHEN SUM(IF(v.vote = 1, 1,0)) < SUM(IF(v.vote = -1, 1,0)) 
+               THEN COUNT(*) * SUM(IF(v.vote = -1, 1,0)) / SUM(IF(v.vote = 1, 1,0))
+               ELSE COUNT(*) * SUM(IF(v.vote = 1, 1,0)) / SUM(IF(v.vote = -1, 1,0))
+            END AS controversialRanking
         FROM posts p
-          JOIN users u ON p.userId=u.id
+          LEFT JOIN users u ON p.userId=u.id
           LEFT JOIN subreddits s ON p.subredditId = s.id
-        ORDER BY postCreatedAt DESC
-        LIMIT ? OFFSET ?`
-        , [limit, offset],
+          LEFT JOIN votes v ON p.id = v.postId
+          GROUP by p.id
+        ORDER BY ${sortingMethod} DESC LIMIT ? OFFSET ?`, [limit, offset],
         function(err, results) {
           if (err) {
+            console.log(err);
             callback(err);
           }
           else {
-            
-            var mappedResults = results.map(function(res){
+            // console.log(results);
+            var mappedResults = results.map(function(res) {
               return {
                 id: res.id,
                 title: res.postTitle,
@@ -137,6 +160,12 @@ module.exports = function RedditAPI(conn) {
                   createdAt: res.userCreatedAt,
                   updatedAt: res.userUpdatedAt
                 },
+                voteScore: res.voteScore,
+                numUpVotes: res.numUpVotes,
+                numDownVotes: res.numDownVotes,
+                totalVotes: res.totalVotes,
+                hottest: res.hottest,
+                controversialRanking: res.controversialRanking,
                 subreddit: {
                   id: res.subId,
                   name: res.name,
@@ -146,13 +175,13 @@ module.exports = function RedditAPI(conn) {
                 }
               }
             })
-            
+
             callback(null, mappedResults);
           }
         }
       );
     },
-    getAllPostsForUser: function (userID, options, callback) {
+    getAllPostsForUser: function(userID, options, callback) {
       if (!callback) {
         callback = options;
         options = {};
@@ -160,7 +189,7 @@ module.exports = function RedditAPI(conn) {
       var userr = userID;
       var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
       var offset = (options.page || 0) * limit;
-      
+
       conn.query(`
         SELECT p.id,
           p.title AS postTitle, 
@@ -176,15 +205,14 @@ module.exports = function RedditAPI(conn) {
           JOIN users u ON p.userId=u.id
           WHERE userId = ?
         ORDER BY postCreatedAt DESC
-        LIMIT ? OFFSET ?`
-        , [userr, limit, offset],
+        LIMIT ? OFFSET ?`, [userr, limit, offset],
         function(err, results) {
           if (err) {
             callback(err);
           }
           else {
-            
-            var mappedResults = results.map(function(res){
+
+            var mappedResults = results.map(function(res) {
               return {
                 id: res.id,
                 title: res.postTitle,
@@ -193,15 +221,67 @@ module.exports = function RedditAPI(conn) {
                 updatedAt: res.postUpdatedAt,
                 userId: res.userId,
                 user: {
-                id: res.userId,
-                username: res.username,
-                createdAt: res.userCreatedAt,
-                updatedAt: res.userUpdatedAt
-                  
+                  id: res.userId,
+                  username: res.username,
+                  createdAt: res.userCreatedAt,
+                  updatedAt: res.userUpdatedAt
+
                 }
               }
             })
-            
+
+            callback(null, mappedResults);
+          }
+        }
+      );
+    },
+    getSinglePost: function(postId, callback) {
+
+      conn.query(`
+        SELECT p.id,
+          p.title AS postTitle, 
+          p.url AS postURL, 
+          p.userId AS postUserId, 
+          p.createdAt AS postCreatedAt, 
+          p.updatedAt AS postUpdatedAt, 
+          u.id AS userId, 
+          u.username, 
+          u.createdAt AS userCreatedAt, 
+          u.updatedAt AS userUpdatedAt,
+          c.id AS commentId,
+          c.text AS commentText,
+          c.postId AS commentPostId,
+          c.createdAt AS commentCreatedAt,
+          c.updatedAt AS commentUpdatedAd
+        FROM posts p
+          JOIN users u ON p.userId=u.id
+          JOIN comments c ON c.postId=p.id
+          LEFT JOIN comments r ON c.id = r.parentId
+          WHERE p.id = ?
+          `, [postId],
+        function(err, results) {
+          if (err) {
+            console.log(err);
+            callback(err);
+          }
+          else {
+            var mappedResults = results.map(function(res) {
+              return {
+                id: res.id,
+                title: res.postTitle,
+                url: res.postURL,
+                createdAt: res.postCreatedAt,
+                updatedAt: res.postUpdatedAt,
+                userId: res.userId,
+                user: {
+                  id: res.userId,
+                  username: res.username,
+                  createdAt: res.userCreatedAt,
+                  updatedAt: res.userUpdatedAt
+                }
+              };
+            });
+
             callback(null, mappedResults);
           }
         }
@@ -220,7 +300,7 @@ module.exports = function RedditAPI(conn) {
             the post and send it to the caller!
             */
             conn.query(
-              'SELECT id, name, description, createdAt, updatedAt FROM subreddits WHERE id = ?', [result.insertId], 
+              'SELECT id, name, description, createdAt, updatedAt FROM subreddits WHERE id = ?', [result.insertId],
               function(err, result) {
                 if (err) {
                   callback(err);
@@ -235,14 +315,14 @@ module.exports = function RedditAPI(conn) {
       );
     },
     getAllSubreddits: function(callback) {
-        conn.query(`
+      conn.query(`
         SELECT id,
           name,
           description,
           createdAt,
           updatedAt
         FROM subreddits
-        ORDER BY createdAt DESC`, 
+        ORDER BY createdAt DESC`,
         function(err, results) {
           if (err) {
             callback(err);
@@ -252,7 +332,141 @@ module.exports = function RedditAPI(conn) {
           }
         }
       );
+    },
+    createComment: function(comment, callback) {
+      if (!comment.userId || !comment.postId) {
+        callback(null, new Error('userId and postId required'));
+        return;
+      }
+      if (!comment.parentId) {
+        comment.parentId = null;
+      }
+      
+      conn.query(
+        'INSERT INTO comments (text, userId, postId, parentId, createdAt) VALUES (?, ?, ?, ?, ?)', 
+        [comment.text, comment.userId, comment.postId, comment.parentId, new Date()],
+        function(err, result) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            /*
+            Post inserted successfully. Let's use the result.insertId to retrieve
+            the post and send it to the caller!
+            */
+            conn.query(
+              'SELECT text, userId, postId, parentId, createdAt FROM comments WHERE id = ?', [result.insertId],
+              function(err, result) {
+                if (err) {
+                  callback(err);
+                }
+                else {
+                  callback(null, result[0]);
+                }
+              });
+          }
+        }
+      );
+    },
+    getCommentsForPost: function(postId, callback) {
+      conn.query(`
+        SELECT c.id,
+          c.text, 
+          c.createdAt, 
+          c.updatedAt,
+          r.id AS replyId,
+          r.text AS replyText,
+          r.createdAt AS replyCreatedAt, 
+          r.updatedAt AS replyUpdatedAt,
+          r2.id AS reply2Id,
+          r2.text AS reply2Text,
+          r2.createdAt AS reply2CreatedAt,
+          r2.updatedAt AS reply2Updated,
+          c.parentId,
+          u.username
+        FROM comments c
+        LEFT JOIN comments r ON c.id = r.parentId
+        LEFT JOIN comments r2 ON r.id = r2.parentId
+        JOIN users u ON c.userId = u.id
+          WHERE c.postId = ? AND c.parentId is null
+          ORDER BY createdAt`, [postId],
+        function(err, results) {
+          if (err) {
+            // console.log(err);
+            callback(err);
+          }
+          else {
+            var finalCommentArray = [];
+            var indexObj = {};
+            
+            results.forEach(function(comment){
+              if (!indexObj[comment.id]) {
+                indexObj[comment.id] = {
+                  id: comment.id,
+                  text: comment.text,
+                  createdAt: comment.createdAt,
+                  updatedAt: comment.updatedAt,
+                  replies: []
+                }
+                finalCommentArray.push(indexObj[comment.id]);
+              }
+               if (!indexObj[comment.replyId] && comment.replyId) {
+                indexObj[comment.replyId] = {
+                  id: comment.replyId,
+                  text: comment.replyText,
+                  createdAt: comment.replyCreatedAt,
+                  updatedAt: comment.replyUpdatedAt,
+                  replies: []
+                };
+                indexObj[comment.id].replies.push(indexObj[comment.replyId]);
+              }
+              if(comment.reply2Id){
+                var lastReply = {
+                  id: comment.reply2Id,
+                  text: comment.reply2Text,
+                  createdAt: comment.reply2CreatedAt,
+                  updatedAt: comment.reply2UpdatedAt,
+                };
+                indexObj[comment.replyId].replies.push(lastReply);
+              }
+  
+                
+            });
+            callback(null, finalCommentArray);
+          }
+        }
+      );
+    },
+    createOrUpdateVote: function(vote, callback) {
+      
+      if (vote.vote !== -1 && vote.vote !== 0 && vote.vote !== 1) {
+        callback(null, new Error('Vote has to be equal to 0,1 or -1'));
+        return;
+      }
+      
+      else {
+        conn.query(
+          'INSERT INTO votes SET postId = ?, userId = ?, vote = ? ON DUPLICATE KEY UPDATE vote = ?', 
+          [vote.postId, vote.userId, vote.vote, vote.vote],
+          function(err, result) {
+            if (err) {
+              callback(err);
+            }
+            else {
+              conn.query(
+              'SELECT postId, userId, vote FROM votes',
+              function(err, result) {
+                if (err) {
+                  console.log(err);
+                  callback(err);
+                }
+                else {
+                  callback(null, result);
+                }
+              });
+            }
+          });
+      }
     }
   };
 };
-
