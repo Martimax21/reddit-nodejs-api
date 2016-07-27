@@ -1,5 +1,12 @@
 var bcrypt = require('bcrypt');
 var HASH_ROUNDS = 10;
+var secureRandom = require('secure-random')
+
+function createSessionToken() {
+  return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
+}
+
+
 
 module.exports = function RedditAPI(conn) {
   return {
@@ -12,7 +19,7 @@ module.exports = function RedditAPI(conn) {
         }
         else {
           conn.query(
-            'INSERT INTO users (username,password, createdAt) VALUES (?, ?, ?)', [user.username, hashedPassword, new Date()],
+            'INSERT INTO users (username, password, createdAt) VALUES (?, ?, ?)', [user.username, hashedPassword, new Date()],
             function(err, result) {
               if (err) {
                 /*
@@ -94,16 +101,16 @@ module.exports = function RedditAPI(conn) {
       }
       var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
       var offset = (options.page || 0) * limit;
-      if (sortingMethod === "Newest ranking") {
-        sortingMethod = 'postCreatedAt';
+      if (sortingMethod === "newestRanking") {
+        sortingMethod = 'newestRanking';
       }
-      if (sortingMethod === "Top Ranking") {
+      if (sortingMethod === "voteScore") {
         sortingMethod = 'voteScore';
       }
-      if (sortingMethod === "Controversial ranking") {
+      if (sortingMethod === "controversialRanking") {
         sortingMethod = 'controversialRanking';
       }
-      if (sortingMethod === "Hotness ranking") {
+      if (sortingMethod === "hotnessRanking") {
         sortingMethod = "SUM(v.vote)/(now() - p.createdAt)"
       }
 
@@ -112,7 +119,7 @@ module.exports = function RedditAPI(conn) {
           p.title AS postTitle, 
           p.url AS postURL, 
           p.userId AS postUserId, 
-          p.createdAt AS postCreatedAt, 
+          p.createdAt AS newestRanking, 
           p.updatedAt AS postUpdatedAt, 
           u.id AS userId, 
           u.username, 
@@ -126,10 +133,10 @@ module.exports = function RedditAPI(conn) {
           SUM(v.vote) as voteScore,
           SUM(v.vote)/(now() - p.createdAt) as hottest,
           COUNT(*) as totalVotes,
-          SUM(IF(v.vote = 1, 1,0)) AS numUpVotes,
-          SUM(IF(v.vote = -1, 1,0)) AS numDownVotes,
+          SUM(IF(v.vote = 1, 1, 0)) AS numUpVotes,
+          SUM(IF(v.vote = -1, 1, 0)) AS numDownVotes,
           CASE 
-            WHEN SUM(IF(v.vote = 1, 1,0)) < SUM(IF(v.vote = -1, 1,0)) 
+            WHEN SUM(IF(v.vote = 1, 1, 0)) < SUM(IF(v.vote = -1, 1,0)) 
                THEN COUNT(*) * SUM(IF(v.vote = -1, 1,0)) / SUM(IF(v.vote = 1, 1,0))
                ELSE COUNT(*) * SUM(IF(v.vote = 1, 1,0)) / SUM(IF(v.vote = -1, 1,0))
             END AS controversialRanking
@@ -151,7 +158,7 @@ module.exports = function RedditAPI(conn) {
                 id: res.id,
                 title: res.postTitle,
                 url: res.postURL,
-                createdAt: res.postCreatedAt,
+                newestRanking: res.newestRanking,
                 updatedAt: res.postUpdatedAt,
                 userId: res.userId,
                 user: {
@@ -164,7 +171,7 @@ module.exports = function RedditAPI(conn) {
                 numUpVotes: res.numUpVotes,
                 numDownVotes: res.numDownVotes,
                 totalVotes: res.totalVotes,
-                hottest: res.hottest,
+                hotnessRanking: res.hottest,
                 controversialRanking: res.controversialRanking,
                 subreddit: {
                   id: res.subId,
@@ -256,7 +263,7 @@ module.exports = function RedditAPI(conn) {
           JOIN users u ON p.userId=u.id
           WHERE userId = 1
         ORDER BY postCreatedAt DESC
-        LIMIT 5 OFFSET 5`, 
+        LIMIT 5 OFFSET 5`,
         function(err, results) {
           if (err) {
             callback(err);
@@ -372,10 +379,9 @@ module.exports = function RedditAPI(conn) {
       if (!comment.parentId) {
         comment.parentId = null;
       }
-      
+
       conn.query(
-        'INSERT INTO comments (text, userId, postId, parentId, createdAt) VALUES (?, ?, ?, ?, ?)', 
-        [comment.text, comment.userId, comment.postId, comment.parentId, new Date()],
+        'INSERT INTO comments (text, userId, postId, parentId, createdAt) VALUES (?, ?, ?, ?, ?)', [comment.text, comment.userId, comment.postId, comment.parentId, new Date()],
         function(err, result) {
           if (err) {
             callback(err);
@@ -429,8 +435,8 @@ module.exports = function RedditAPI(conn) {
           else {
             var finalCommentArray = [];
             var indexObj = {};
-            
-            results.forEach(function(comment){
+
+            results.forEach(function(comment) {
               if (!indexObj[comment.id]) {
                 indexObj[comment.id] = {
                   id: comment.id,
@@ -441,7 +447,7 @@ module.exports = function RedditAPI(conn) {
                 }
                 finalCommentArray.push(indexObj[comment.id]);
               }
-               if (!indexObj[comment.replyId] && comment.replyId) {
+              if (!indexObj[comment.replyId] && comment.replyId) {
                 indexObj[comment.replyId] = {
                   id: comment.replyId,
                   text: comment.replyText,
@@ -451,7 +457,7 @@ module.exports = function RedditAPI(conn) {
                 };
                 indexObj[comment.id].replies.push(indexObj[comment.replyId]);
               }
-              if(comment.reply2Id){
+              if (comment.reply2Id) {
                 var lastReply = {
                   id: comment.reply2Id,
                   text: comment.reply2Text,
@@ -460,41 +466,93 @@ module.exports = function RedditAPI(conn) {
                 };
                 indexObj[comment.replyId].replies.push(lastReply);
               }
-  
-                
+
+
             });
             callback(null, finalCommentArray);
           }
         }
       );
     },
+    checkLogin: function(user, pass, callback) {
+      conn.query('SELECT * FROM users WHERE username = ?', [user], function(err, result) {
+        // check for errors, then...
+        if (result.length === 0) {
+          callback(new Error('username or password incorrect')); // in this case the user does not exists
+        }
+        else {
+          var user = result[0];
+          var actualHashedPassword = user.password;
+          bcrypt.compare(pass, actualHashedPassword, function(err, result) {
+            if (result === true) { // let's be extra safe here
+              callback(null, user);
+            }
+            else {
+              callback(new Error('username or password incorrect')); // in this case the password is wrong, but we reply with the same error
+            }
+          });
+        }
+      });
+    },
+
+    createSession: function(userId, callback) {
+       var token = createSessionToken();
+       conn.query('INSERT INTO sessions SET userId = ?, token = ?', [userId, token], function(err, result) {
+       if (err) {
+         callback(err);
+        }
+       else {
+         callback(null, token); // this is the secret session token :)
+       }
+       })
+    },
+    getUserFromSession: function(sessionToken, callback){
+      conn.query(`
+        SELECT
+          sessions.userId as id,
+          users.username as username
+        FROM sessions
+        JOIN users ON sessions.userId = users.id
+        WHERE token = ?`,[sessionToken],
+        function(err, userId) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            console.log(userId);
+            callback(null, userId);
+          }
+        }
+      );
+    
+    },
     createOrUpdateVote: function(vote, callback) {
-      
+
       if (vote.vote !== -1 && vote.vote !== 0 && vote.vote !== 1) {
         callback(null, new Error('Vote has to be equal to 0,1 or -1'));
-        return;
       }
-      
+
       else {
+        console.log(vote.postId, vote.userId, vote.vote);
         conn.query(
-          'INSERT INTO votes SET postId = ?, userId = ?, vote = ? ON DUPLICATE KEY UPDATE vote = ?', 
-          [vote.postId, vote.userId, vote.vote, vote.vote],
+          'INSERT INTO votes SET postId = ?, userId = ?, vote = ? ON DUPLICATE KEY UPDATE vote = ?', [vote.postId, vote.userId, vote.vote, vote.vote],
           function(err, result) {
             if (err) {
+              console.log(err);
               callback(err);
             }
             else {
               conn.query(
-              'SELECT postId, userId, vote FROM votes',
-              function(err, result) {
-                if (err) {
-                  console.log(err);
-                  callback(err);
-                }
-                else {
-                  callback(null, result);
-                }
-              });
+                'SELECT postId, userId, vote FROM votes',
+                function(err, result) {
+                  if (err) {
+                    console.log(err);
+                    callback(err);
+                  }
+                  else {
+                    callback(null, result);
+                  }
+                });
             }
           });
       }

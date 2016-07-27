@@ -38,3 +38,18 @@ app.get('/money/:account', function(request, response) {
 });
 
 app.listen(process.env.PORT);
+
+
+//in class examples: july 26th. additions to exercised from yesterday (expressjs)
+app.disable("x-powered-by");
+
+app.get("/hello"), function(req, res) {
+    var name = req.query.name
+    
+    if (!name) {
+        res.send("<h1>Hello World!</h1>");
+    }
+    else {
+        res.send("<h1>Hello ${name}</h1>");
+    }
+}

@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/stylin.css">
+    </head>
+
+    <div id="homepage">
+      <h1>Log-in to Max & Jess's Reddit</h1>
+        <h3><% if(message) { %><font color="red">Your username or password was incorrect. Please try again!</font></h3>
+        <% } else { %>Enter your username and password below!</h3> <% } %>
+        <form action="/login" method="POST">
+            <div>
+                <input type="text" name="username" placeholder="Username">
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="Password">
+            </div>
+            
+            <button type="submit">Log-in</button>
+        </form>
+    </div>
+</html>

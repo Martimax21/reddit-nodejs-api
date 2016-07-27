@@ -1,0 +1,57 @@
+html {
+    background-color: #f4f4f4;
+}
+h1{
+    font-family: Arial, Helvetica, sans-serif;
+    color: #3C948B;
+}
+h2{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.button{
+    float: left;
+    margin: 10px;
+}
+
+.topnav{
+    float: left;
+    margin: 10px;
+}
+#topbuttons{
+    float: left;
+}
+#dummy{
+    height: 10px;
+    width: 10px;
+}
+/*.contents-list{*/
+/*    float: left;*/
+/*}*/
+
+
+
+a:link {
+    color: 	#313131;
+}
+a:visited {
+    color: 	#313131;
+}
+a:hover {
+    color: #3c948b;
+}
+a:active{
+    color: #3c948b;
+}
+
+ol {
+    background: #ffffff;
+    padding: 20px;
+}
+
+
+ol li {
+    margin: 5px;
+    color: #313131;
+    font-family: Arial, Helvetica, sans-serif;
+}

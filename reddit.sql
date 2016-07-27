@@ -68,3 +68,10 @@ CREATE TABLE votes (
   FOREIGN Key (postId) REFERENCES posts(id),
   FOREIGN Key (userId) REFERENCES users(id)
 );
+
+CREATE TABLE sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY, 
+  userId INT,
+  token VARCHAR (255),
+  FOREIGN Key (userId) REFERENCES users(id)  
+);

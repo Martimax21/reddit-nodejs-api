@@ -1,7 +1,7 @@
 //from reddit.js
 var reddit = require('./reddit');
+var bodyParser = require('body-parser');
 var mysql = require('mysql');
-var bodyParser = require('body-parser')
 
 var connection = mysql.createConnection({
   host     : 'localhost',
@@ -36,6 +36,7 @@ app.post('/createContent', function(req, res) {
     // console.log(req.body)
     var url = req.body.url;
     var title = req.body.title;
+    
     
     redditAPI.createPost(
     {userId: 1, title: title, url: url},6, function(err, post) {
