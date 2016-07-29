@@ -1,10 +1,11 @@
+
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="/stylin.css">
     </head>
 
     <div id="createPost">
-        <h2>To create a new post, please enter a URL and a title</h2>
+        <h2>To add a comment, please enter a URL and a title</h2>
         <form action="/createPost" method="POST">
             <div>
                 <input type="text" name="title" placeholder="Title">
@@ -13,7 +14,14 @@
                 <input type="text" name="url" placeholder="URL">
             </div>
             <div>
-                <input type="text" name="subredditId" placeholder="SubredditId">
+                <!--<input type="text" name="subredditId" placeholder="SubredditId">-->
+                <select name="subredditDropDown"> 
+                <% options = subs.map(function(subreddit) {
+                      return  `<option value="${subreddit}">${subreddit}</option>`;
+                    });
+                 %>
+                 <%- options.join("") %>
+                </select>
             </div>
             <button type="submit">Create your post!</button>
         </form>

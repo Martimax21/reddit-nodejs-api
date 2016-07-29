@@ -4,80 +4,107 @@
     <link rel="stylesheet" type="text/css" href="/stylin.css">
 </head>
 
-<div id= "topbuttons">
-    <div class="topnav">
-        <form action="/del" method="post">
-            <button type="submit">Log out</button>
-        </form>
-    </div>
-    <div class="topnav">
-        <form action="/login" method="get">
-            <button type="submit">Log in</button>
-        </form>
-    </div>
-    <div class="topnav">
-        <form action="/createPost" method="get">
-            <button type="submit">Create a post</button>
-        </form>
+
+<div id="head">
+
+    <ul id="topbuttons">
+        <li class="topbutton">
+            <form action="/del" method="post">
+                <button class="navButtons" type="submit">Log out</button>
+            </form>
+        </li>
+        <li class="topbutton">
+            <form action="/signup" method="get">
+                <button class="navButtons" type="submit">Sign up</button>
+            </form>
+        </li>
+        <li class="topbutton">
+            <form action="/login" method="get">
+                <button class="navButtons" type="submit">Log in</button>
+            </form>
+        </li>
+        <li class="topbutton">
+            <form action="/createPost" method="get">
+                <button class="navButtons" type="submit">Create a post</button>
+            </form>
+        </li>
+    </ul>
+    <div id="titleLogo">
+        <img class="logo" src="http://network.napco.com/book-business/wp-content/uploads/sites/4/2016/01/Reddit-Logo-Smaller.png" />
+        <div id="titleText">
+            <h1>Max & Jess's Reddit: <i>It's better than Reddit</i></h1>
+        </div>
     </div>
 </div>
-<div id="dummy"></div>
-<div id="title">
-    <h1>Max & Jess's Reddit: <i>It's better than Reddit</i></h1>
-    <h2>Top 25 Posts by <%= sort %>:</h2>
-</div>
+<div id="body">
+    <ul id="sortingButtons">
+        <h2>Top 25 Posts by <%= sort %>:</h2>
+        <li class="rankingbuttons">
+            <form action="/sort/hotnessRanking" method="get">
+                <button class="sortingButtons <%= sort==='hotnessRanking' ? 'active' : ''%>" type="submit">Hottest </button>
+            </form>
+        </li>
+        <li class="rankingbuttons">
+            <form action="/sort/controversialRanking" method="get">
+                <button class="sortingButtons <%= sort==='controversialRanking' ? 'active' : ''%>" type="submit">Controversial </button>
+            </form>
+        </li>
+        <li class="rankingbuttons">
+            <form action="/sort/newestRanking" method="get">
+                <button class="sortingButtons <%= sort==='newestRanking' ? 'active' : ''%>" type="submit">Newest </button>
+            </form>
+        </li>
+        <li class="rankingbuttons">
+            <form action="/sort/voteScore" method="get">
+                <button class="sortingButtons <%= sort==='voteScore' ? 'active' : ''%>" type="submit">Top Rated </button>
+            </form>
+        </li>
+    </ul>
 
-<h3>
-      <div class="button">
-          <form action="/" method="get">
-              <button type="submit">Hottest </button>
-          </form>
-        </div>
-        <div class="button">
-          <form action="/sort/controversialRanking" method="get">
-              <button type="submit">Controversial </button>
-          </form>
-        </div>
-        <div class="button">
-          <form action="/sort/newestRanking" method="get">
-              <button type="submit">Newest </button>
-          </form>
-        </div>
-        <div class="button">
-          <form action="/sort/voteScore" method="get">
-              <button type="submit">Top Rated </button>
-          </form>
-        </div>
-  </h3>
 
-<ol class="contents-list">
-    <% posts.forEach(function(post) { %>
-        <li class="content-item">
-            <h3 class="content-item__title">
+<div id="allposts">
+    <ol class="contents-list">
+        <% posts.forEach(function(post) { %>
+            <li class="content-item">
+                <h3 class="content-item__title">
             <a href="<%= post.url %>"><%= post.title %></a>
           </h3>
-            <h4><% if(sort !== "newestRanking") { %>Score 
+                <h4><% if(sort !== "newestRanking") { %>Score 
         <%= post[sort] %></h4>
-            <% } %>
-                <p>Created by
-                    <%= post.user.username %> on
-                        <%= dateFormat(post.newestRanking, "yyyy-mm-dd h:MM:ss TT") %>
-                            in the Subreddit:
-                            <%= post.subreddit.name %>
-                </p>
-                <form action="/vote" method="post">
-                    <input type="hidden" name="vote" value="1">
-                    <input type="hidden" name="postId" value="<%= post.id %>">
-                    <button type="submit">upvote this post</button>
-                </form>
-                <form action="/vote" method="post">
-                    <input type="hidden" name="vote" value="-1">
-                    <input type="hidden" name="postId" value="<%= post.id %>">
-                    <button type="submit">downvote this post</button>
-                </form>
-        </li>
-        <% }); %>
-</ol>
+                <% } %>
 
+                    <p>Created by
+                        <%= post.user.username %> on
+                            <%= dateFormat(post.newestRanking, "yyyy-mm-dd h:MM:ss TT") %>
+                                in the Subreddit:
+                                <%= post.subreddit.name %>
+                    </p>
+                    <a href="/comments/:<%= post.id %>">
+                        <%= post.totalComments %> comments </a>
+                        
+                    <form action="/createComment" method="get">
+                        <button class="commentButtons" type="submit">Add YOUR comment</button>
+                        <input type="hidden" class="createCommentButton" name="postId" value="<%= post.id %>">
+                    </form>
+                    
+                    <form action="/vote" method="post">
+                        <input type="hidden" name="vote" value="1">
+                        <input type="hidden" name="postId" value="<%= post.id %>">
+                        <p class="voteScore">
+                            <%= post.numUpVotes %>
+                                <button class="votebutton <%= post.yourVote===1 ? 'activeVote' : ''%>" type="submit">upvote this post</button></p>
+                    </form>
+                    <form action="/vote" method="post">
+                        <input type="hidden" name="vote" value="-1">
+                        <input type="hidden" name="postId" value="<%= post.id %>">
+                        <p class="voteScore">
+                            <%= post.numDownVotes%>
+                                <button class="votebutton <%= post.yourVote===-1 ? 'activeVote' : ''%>" type="submit">downvote this post</button></p>
+                    </form>
 
+            </li>
+            <% }); %>
+    </ol>
+</div>
+</div>
 </html>

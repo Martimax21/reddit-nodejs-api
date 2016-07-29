@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/stylin.css">
+    </head>
+
+    <div id="commentPage">
+      <h1>We want YOUR <i>OPINION</i></h1>
+        <h3>Write your comment below and don't be rude</h3>
+        <form action="/createComment" method="POST">
+            <div>
+                <textarea name="commentText" id="comments" cols="25" rows="3"></textarea>
+                <input type="hidden" name="postId" value="<%= postId %>">
+                
+            </div>
+            <button type="submit">Submit your comment!</button>
+        </form>
+    </div>
+</html>

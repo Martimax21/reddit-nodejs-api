@@ -16,7 +16,10 @@
     "dateformat": "^1.0.12",
     "ejs": "^2.5.1",
     "express": "^4.14.0",
+    "express-session": "^1.14.0",
     "mysql": "^2.11.1",
+    "passport": "^0.3.2",
+    "passport-auth0": "^0.5.2",
     "secure-random": "^1.1.1",
     "sha1": "^1.1.1"
   }

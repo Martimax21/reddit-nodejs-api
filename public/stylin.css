@@ -1,34 +1,125 @@
 html {
-    background-color: #f4f4f4;
+    background-color: #e9fcf4;
 }
 h1{
     font-family: Arial, Helvetica, sans-serif;
-    color: #3C948B;
+    color: 	#362E30;
+    font-size: 3em;
 }
 h2{
     font-family: Arial, Helvetica, sans-serif;
+    color: #696969;
 }
 
-.button{
+
+#head{
+    width: 100%;
+    position: static;
+    background-color: #e9fcf4;
+    top: 0px;
+}
+#body {
+    position: static;
+    /*padding-top: 200px;*/
+}
+img{
     float: left;
-    margin: 10px;
+    max-width: 150px;
+    margin-left: 30px;
+    margin-right: 10px;
 }
 
-.topnav{
-    float: left;
-    margin: 10px;
+#allposts{
+    width:100%;
+    float:left;
+    margin-left: 40px;
 }
-#topbuttons{
-    float: left;
-}
-#dummy{
-    height: 10px;
-    width: 10px;
-}
-/*.contents-list{*/
-/*    float: left;*/
-/*}*/
 
+.rankingbuttons{
+    float: left;
+    margin-right: 10px;
+}
+
+
+.active{
+    background-color: #FFF !important;
+    color: #438585 !important;
+}
+
+.activeVote{
+    background-color: #c5cefd !important;
+    color: #431115 !important;
+}
+
+.sortingButtons{
+    color: #FFF;
+    background-color: #438585;
+    /*font-weight: bold;*/
+    font-family: Arial, Helvetica, sans-serif;
+}
+.sortingButtons:hover{
+    background-color: #FFF;
+    color: #438585;
+}
+#sortingButtons{
+    display: inline-block;
+    list-style: none;
+    /*clear: both;*/
+    width: 100%;
+}
+.votebutton{
+    clear: both;
+
+}
+.voteScore{
+    align-content: left;
+    font-weight: bold;
+}
+
+.navButtons{
+    background-color: #FFF;
+    /*font-weight: bold;*/
+    font-family: Arial, Helvetica, sans-serif;
+}
+.commentButtons{
+    background-color: #4B4B81;
+    /*font-weight: bold;*/
+    font-family: Arial, Helvetica, sans-serif;
+    color: #FFF;
+}
+.commentButtons:hover{
+    background-color: #FFF;
+    /*font-weight: bold;*/
+    font-family: Arial, Helvetica, sans-serif;
+    color: #4B4B81;
+}
+
+
+#titleLogo {
+    clear: both;
+}
+
+#topbuttons {
+    float: right;
+}
+
+
+.topbutton{
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.navButtons:hover{
+    background-color: #438585;
+    color: #FFF;    
+}
+
+
+
+
+.contents-list{
+    float: left;
+}
 
 
 a:link {

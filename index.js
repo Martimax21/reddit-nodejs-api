@@ -7,8 +7,7 @@ var dateFormat = require("dateformat");
 var cookieParser = require("cookie-parser");
 var secureRandom = require('secure-random');
 // var sha1 = require("sha1");
-var del = function(req, res) { res.clearCookie('SESSION'); res.redirect('/'); };
-
+var del = function(req, res) { res.cookie('SESSION', "", {expires: new Date()}); res.redirect('/'); };
 
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
@@ -29,12 +28,40 @@ app.use(express.static(__dirname + '/public')); //for CSS file
 app.use(bodyParser.urlencoded({ extended: true })); //parsing posts
 app.use(cookieParser());
 
+
+
+/* ADDED THIS FRIDAY */
+//passport stuff:
+var passport = require('passport');
+// This is the file we created in step 2.
+// This will configure Passport to use Auth0
+var strategy = require('./setup-passport');
+// Session and cookies middlewares to keep user logged in
+var session = require('express-session');
+app.use(session({ secret: 'DGmDMELtipNYcNNwrgN6G95M11IWuHyTj23Pnpn5k7RfD-QyqrpEK3C654H0sVfS', resave: false,  saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+//auth0 callback
+
+
+
+app.get("/login",  passport.authenticate('auth0', { failureRedirect: '/signup' }),
+  function(req, res) {
+    if (!req.user) {
+      throw new Error('user null');
+    }
+    // var firstName = req.user.name.givenName;
+    res.redirect("/");
+    // res.render("homepage", {firstName: firstName});
+  });
+/* CODE ABOVE ADDED FRIDAY */
+
+
+
 function checkLoginToken(request, response, next) {
   if (request.cookies.SESSION) {
     redditAPI.getUserFromSession(request.cookies.SESSION, function(err, user) {
       if (user) {
-        console.log(user[0].username);
-        console.log(user[0].id);
         request.loggedInUser = user;
       }
       next();
@@ -51,9 +78,21 @@ app.get('/createPost', function (req, res) {
     res.status(401).send('You must be logged in to create content!');
   }
   else {
-    res.render("newpost");
+    redditAPI.getAllSubreddits(function(err, sub) {
+      if (err) {
+        console.log("Whoopsy! Something went wrong! :'(");
+      }
+      else {
+        var subs = sub.map(function(subreddit) {
+          return subreddit.name;
+        });
+      }
+       res.render("newpost", {subs: subs});
+    });
+   
   }
 });
+
 
 app.post('/createPost', function(req, res) {
   if (!req.loggedInUser) {
@@ -64,15 +103,15 @@ app.post('/createPost', function(req, res) {
       title: req.body.title,
       url: req.body.url,
       userId: req.loggedInUser[0].id
-    }, req.body.subredditId, function(err, post) {
-      res.send('You just created a new post :)');
-    })
-  }
+    }, req.body.subredditDropDown, function(err, post) {
+      res.redirect('/sort/newestRanking');
+      }
+  )}
 })
 
 app.post('/vote', function(req, res) {
   if (!req.loggedInUser) {
-    res.status(401).send('You must be logged in to create content!');
+    res.status(401).send('You must be logged in to vote!');
   }
   else {
     redditAPI.createOrUpdateVote({
@@ -80,7 +119,7 @@ app.post('/vote', function(req, res) {
      postId: parseInt(req.body.postId),
      vote: parseInt(req.body.vote)
      }, function(err, vote) {
-      res.send('You just voted :)');
+      res.redirect('/');
     })
   }
 })
@@ -98,8 +137,21 @@ app.get("/", function(req, res) {
       res.status(400).send("Please try again!");
     }
     else {
-      var sort = "hotnessRanking"
-      res.render("homepage", {posts: posts, sort: sort});
+        var sort = "hotnessRanking";
+        res.render("homepage", {posts: posts, sort: sort});
+    }
+  });
+});
+
+app.get("/comments/:postId", function(req, res) {
+  console.log(req.params.postId);
+  redditAPI.getCommentsForPost(req.params.postId, function(err, comments) {
+    if (err) {
+      console.log(err);
+      res.status(400).send("Please try again!");
+    }
+    else {
+        res.render("comments", {comments: comments});
     }
   });
 });
@@ -136,7 +188,27 @@ app.post("/signup", function (req, res) {
       res.status(400).send("Whoopsy! Something went wrong!");
     }
     else {
-      console.log(user);
+      res.redirect("/");
+    }
+  });
+});
+
+app.get("/createcomment", function (req, res) {
+  res.render("comment", {postId: req.query.postId});
+});
+
+app.post("/createcomment", function (req, res) {
+  redditAPI.createComment({
+    text: req.body.commentText,
+    userId: parseInt(req.loggedInUser[0].id),
+    postId: req.body.postId,
+    parentId: null
+  }, function (err, user) {
+    if (err) {
+      console.log(err);
+      res.status(400).send("Whoopsy! Something went wrong!");
+    }
+    else {
       res.redirect("/");
     }
   });
@@ -144,9 +216,9 @@ app.post("/signup", function (req, res) {
 
 
 
-app.get("/login", function (req, res) {
-      res.render("login", {message: req.query.message});
-});
+// app.get("/login", function (req, res) {
+//     res.render("login", {message: req.query.message});
+// });
 
 
 

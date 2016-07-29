@@ -65,33 +65,41 @@ module.exports = function RedditAPI(conn) {
         }
       });
     },
-    createPost: function(post, subredditId, callback) {
-      conn.query(
-        'INSERT INTO posts (userId, title, url, createdAt, subredditId) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, new Date(), subredditId],
-        function(err, result) {
-          // console.log(result);
-          if (err) {
-            callback(err);
-          }
-          else {
-            /*
-            Post inserted successfully. Let's use the result.insertId to retrieve
-            the post and send it to the caller!
-            */
-            conn.query(
-              'SELECT id,title,url,userId, createdAt, updatedAt, subredditId FROM posts WHERE id = ?', [result.insertId],
-              function(err, result) {
-                if (err) {
-                  callback(err);
-                }
-                else {
-                  callback(null, result[0]);
-                }
-              }
-            );
-          }
+    createPost: function(post, subredditName, callback) {
+      conn.query(`Select id from subreddits WHERE name = ?`, [subredditName], function(err, subredditId) {
+        if (err) {
+          callback(err)
+          console.log(err);
         }
-      );
+        else {
+          conn.query(
+            'INSERT INTO posts (userId, title, url, createdAt, subredditId) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, new Date(), subredditId[0].id],
+            function(err, result) {
+              if (err) {
+                callback(err);
+                console.log(err);
+              }
+              else {
+                /*
+                Post inserted successfully. Let's use the result.insertId to retrieve
+                the post and send it to the caller!
+                */
+                conn.query(
+                  'SELECT id,title,url,userId, createdAt, updatedAt, subredditId FROM posts WHERE id = ?', [result.insertId],
+                  function(err, result) {
+                    if (err) {
+                      callback(err);
+                    }
+                    else {
+                      callback(null, result[0]);
+                    }
+                  }
+                );
+              }
+            }
+          );
+        }
+      })
     },
     getAllPosts: function(options, sortingMethod, callback) {
       // In case we are called without an options parameter, shift all the parameters manually
@@ -131,8 +139,9 @@ module.exports = function RedditAPI(conn) {
           s.createdAt AS subCreatedAt,
           s.updatedAt AS subUpdatedAt,
           SUM(v.vote) as voteScore,
-          SUM(v.vote)/(now() - p.createdAt) as hottest,
+          (SUM(v.vote))*100000000/(now() - p.createdAt) as hottest,
           COUNT(*) as totalVotes,
+          COUNT(c.id) as totalComments,
           SUM(IF(v.vote = 1, 1, 0)) AS numUpVotes,
           SUM(IF(v.vote = -1, 1, 0)) AS numDownVotes,
           CASE 
@@ -144,6 +153,7 @@ module.exports = function RedditAPI(conn) {
           LEFT JOIN users u ON p.userId=u.id
           LEFT JOIN subreddits s ON p.subredditId = s.id
           LEFT JOIN votes v ON p.id = v.postId
+          LEFT JOIN comments c ON c.postId = p.id
           GROUP by p.id
         ORDER BY ${sortingMethod} DESC LIMIT ? OFFSET ?`, [limit, offset],
         function(err, results) {
@@ -172,6 +182,7 @@ module.exports = function RedditAPI(conn) {
                 numDownVotes: res.numDownVotes,
                 totalVotes: res.totalVotes,
                 hotnessRanking: res.hottest,
+                totalComments: res.totalComments,
                 controversialRanking: res.controversialRanking,
                 subreddit: {
                   id: res.subId,
@@ -419,6 +430,7 @@ module.exports = function RedditAPI(conn) {
           r2.text AS reply2Text,
           r2.createdAt AS reply2CreatedAt,
           r2.updatedAt AS reply2Updated,
+          COUNT(c.id) as totalComments,
           c.parentId,
           u.username
         FROM comments c
@@ -433,7 +445,7 @@ module.exports = function RedditAPI(conn) {
             callback(err);
           }
           else {
-            var finalCommentArray = [];
+            var finalCommentArray = [{totalComments: results[0].totalComments}];
             var indexObj = {};
 
             results.forEach(function(comment) {
@@ -469,7 +481,29 @@ module.exports = function RedditAPI(conn) {
 
 
             });
+//            finalCommentArray.push({totalComments: results[0].totalComments});
+            console.log(finalCommentArray);
+            console.log(results[0].totalComments);
             callback(null, finalCommentArray);
+          }
+        }
+      );
+    },
+    getTotalCommentsForPost: function(postId, callback) {
+      conn.query(`
+        SELECT 
+          COUNT(*) as totalComments
+        FROM comments 
+        JOIN users ON comments.userId = users.id
+          WHERE comments.postId = ?`, [postId],
+        function(err, totalComments) {
+          if (err) {
+            console.log(err);
+            callback(err);
+          }
+          else {
+            console.log(totalComments[0]);
+            callback(null, totalComments[0]);
           }
         }
       );
