@@ -2,10 +2,11 @@
 var mysql = require('mysql');
 var bodyParser = require("body-parser");
 var express = require("express");
-var ejs = require("ejs");
+// var ejs = require("ejs");
 var dateFormat = require("dateformat");
 var cookieParser = require("cookie-parser");
 var secureRandom = require('secure-random');
+var engine = require('ejs-mate'); 
 // var sha1 = require("sha1");
 var del = function(req, res) { res.cookie('SESSION', "", {expires: new Date()}); res.redirect('/'); };
 
@@ -29,35 +30,6 @@ app.use(bodyParser.urlencoded({ extended: true })); //parsing posts
 app.use(cookieParser());
 
 
-
-/* ADDED THIS FRIDAY */
-//passport stuff:
-var passport = require('passport');
-// This is the file we created in step 2.
-// This will configure Passport to use Auth0
-var strategy = require('./setup-passport');
-// Session and cookies middlewares to keep user logged in
-var session = require('express-session');
-app.use(session({ secret: 'DGmDMELtipNYcNNwrgN6G95M11IWuHyTj23Pnpn5k7RfD-QyqrpEK3C654H0sVfS', resave: false,  saveUninitialized: false }));
-app.use(passport.initialize());
-app.use(passport.session());
-//auth0 callback
-
-
-
-app.get("/login",  passport.authenticate('auth0', { failureRedirect: '/signup' }),
-  function(req, res) {
-    if (!req.user) {
-      throw new Error('user null');
-    }
-    // var firstName = req.user.name.givenName;
-    res.redirect("/");
-    // res.render("homepage", {firstName: firstName});
-  });
-/* CODE ABOVE ADDED FRIDAY */
-
-
-
 function checkLoginToken(request, response, next) {
   if (request.cookies.SESSION) {
     redditAPI.getUserFromSession(request.cookies.SESSION, function(err, user) {
@@ -74,6 +46,7 @@ function checkLoginToken(request, response, next) {
 app.use(checkLoginToken);
 
 app.get('/createPost', function (req, res) {
+  console.log(req.user)
   if (!req.loggedInUser) {
     res.status(401).send('You must be logged in to create content!');
   }
@@ -151,7 +124,7 @@ app.get("/comments/:postId", function(req, res) {
       res.status(400).send("Please try again!");
     }
     else {
-        res.render("comments", {comments: comments});
+        res.render("displaycomments", {comments: comments});
     }
   });
 });
@@ -194,7 +167,7 @@ app.post("/signup", function (req, res) {
 });
 
 app.get("/createcomment", function (req, res) {
-  res.render("comment", {postId: req.query.postId});
+  res.render("creatcomment", {postId: req.query.postId});
 });
 
 app.post("/createcomment", function (req, res) {
@@ -216,9 +189,9 @@ app.post("/createcomment", function (req, res) {
 
 
 
-// app.get("/login", function (req, res) {
-//     res.render("login", {message: req.query.message});
-// });
+app.get("/login", function (req, res) {
+    res.render("login", {message: req.query.message});
+});
 
 
 

@@ -1,9 +1,12 @@
-<html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="/stylin.css">
-    </head>
+<head>
+    <title> Create comment page </title>
+    <link rel="stylesheet" type="text/css" href="/stylin.css">
+</head>
 
-    <div id="commentPage">
+<body>
+    <% include partials/header %>
+    
+    <main>
       <h1>We want YOUR <i>OPINION</i></h1>
         <h3>Write your comment below and don't be rude</h3>
         <form action="/createComment" method="POST">
@@ -14,5 +17,7 @@
             </div>
             <button type="submit">Submit your comment!</button>
         </form>
-    </div>
+    </main>
+    <footer>&copy; 2016 myself!</footer>
+</body>
 </html>

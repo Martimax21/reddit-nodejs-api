@@ -1,45 +1,87 @@
 html {
-    background-color: #e9fcf4;
+    background-color: #FCFFFD;
 }
+body{
+    overflow-x: hidden;
+}
+
 h1{
     font-family: Arial, Helvetica, sans-serif;
     color: 	#362E30;
     font-size: 3em;
 }
 h2{
-    font-family: Arial, Helvetica, sans-serif;
-    color: #696969;
+    font-size: 0.9em;
+    font-family: "Verdana";
+    /*font-family: Arial, Helvetica, sans-serif;*/
+    color: #000;
 }
 
-
-#head{
+/*h3 {*/
+/*    font-family: Arial, Helvetica, sans-serif;*/
+/*    color: #696969;*/
+/*}*/
+#logo {
+    max-width: 100px;
+    max-height: 100;
+}
+#form{
     width: 100%;
-    position: static;
+}
+
+#signuphead{
+    width: 100%;
+    /*position: ;*/
     background-color: #e9fcf4;
     top: 0px;
 }
-#body {
-    position: static;
+#bodysignup {
+    position: relative;
+    padding-top: 80px;
+    margin-left: 50px;
+}
+main {
+    /*position: static;*/
     /*padding-top: 200px;*/
 }
-img{
-    float: left;
-    max-width: 150px;
-    margin-left: 30px;
-    margin-right: 10px;
+body #homepage{
+    display: flex;
+    flex-direction: column;
+}
+#allPosts{
+    flex-direction: column;
+    justify-content: flex-start;
+}
+#eachPost{
+    display: flex;
+    background-color: #FFF;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    border-top-style: dotted;
+    /*border-right-style: solid;*/
+    /*border-left-style: solid;*/
+    border-width: 1px;
+    border-color: #4B4B81;
+    width: 100%;
+    /*max-width: 700px*/
+    padding: 10px;
+}
+#eachPost section{
+    margin-left: 10px;
+    font-size: 12px;
 }
 
-#allposts{
-    width:100%;
-    float:left;
-    margin-left: 40px;
+.vote{
+    /*display: flex;*/
+    flex-direction: column;
+    margin-right: 15px;
+    align-content: flex-start;
+    padding: 10px;
+    /*background-color: #E0FFFF;*/
+    color: #000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.75em;
 }
-
-.rankingbuttons{
-    float: left;
-    margin-right: 10px;
-}
-
 
 .active{
     background-color: #FFF !important;
@@ -53,27 +95,74 @@ img{
 
 .sortingButtons{
     color: #FFF;
-    background-color: #438585;
+    background-color: #D90000;
     /*font-weight: bold;*/
     font-family: Arial, Helvetica, sans-serif;
+    border-radius: 4px;
 }
 .sortingButtons:hover{
     background-color: #FFF;
-    color: #438585;
+    color: #000;
 }
-#sortingButtons{
+#sortingButtons li{
     display: inline-block;
-    list-style: none;
-    /*clear: both;*/
-    width: 100%;
 }
+
 .votebutton{
-    clear: both;
+    /*clear: both;*/
 
 }
-.voteScore{
-    align-content: left;
-    font-weight: bold;
+/*.commentButtons{*/
+/*    background-color: #220907;*/
+    /*font-weight: bold;*/
+/*    font-family: Arial, Helvetica, sans-serif;*/
+/*    color: #FFF;*/
+/*    float: left*/
+/*}*/
+/*.commentButtons:hover{*/
+/*    background-color: #FFF;*/
+    /*font-weight: bold;*/
+/*    font-family: Arial, Helvetica, sans-serif;*/
+/*    color: #4B4B81;*/
+/*}*/
+.btn-group-xs>.btn, .btn-xs{
+    float:left;
+}
+
+.clearfix:after {
+    content:" ";
+    display:table;
+    clear:both;
+}
+
+/*header*/
+header{
+    padding: 30px;
+    position: relative;
+    /*background-color: #e9fcf4;*/
+    justify-content: center;
+    flex-direction: row-reverse
+}
+
+/*centering header*/ 
+header .logo {
+    position: absolute;
+    top: 50%;
+    right: auto;
+    left: 50%;
+    bottom: auto;
+    transform: translateY(-50%) translateX(-50%);
+}
+
+#topbuttons {
+    float: right;
+}
+#topbuttons ul {
+    display: flex;
+    list-style-type: none;
+}
+#topbuttons li{
+
 }
 
 .navButtons{
@@ -81,47 +170,24 @@ img{
     /*font-weight: bold;*/
     font-family: Arial, Helvetica, sans-serif;
 }
-.commentButtons{
-    background-color: #4B4B81;
-    /*font-weight: bold;*/
-    font-family: Arial, Helvetica, sans-serif;
+
+/*Form buttons*/
+input[type=text] {
     color: #FFF;
-}
-.commentButtons:hover{
-    background-color: #FFF;
-    /*font-weight: bold;*/
+    background-color: #438585;
     font-family: Arial, Helvetica, sans-serif;
-    color: #4B4B81;
 }
-
-
-#titleLogo {
-    clear: both;
-}
-
-#topbuttons {
-    float: right;
-}
-
-
-.topbutton{
-    margin-right: 10px;
-    display: inline-block;
+input[type=password] {
+    
 }
 
 .navButtons:hover{
-    background-color: #438585;
+    background-color: #D90000;
     color: #FFF;    
 }
-
-
-
-
-.contents-list{
-    float: left;
+.title:link{
+    color: #2E817E;
 }
-
-
 a:link {
     color: 	#313131;
 }
@@ -136,13 +202,102 @@ a:active{
 }
 
 ol {
-    background: #ffffff;
-    padding: 20px;
+    /*padding: 20px;*/
+    width: 100%;
+    margin-left: 0px;
 }
 
 
 ol li {
-    margin: 5px;
     color: #313131;
     font-family: Arial, Helvetica, sans-serif;
+}
+
+/* CSS for LOG IN and SIGN UP */
+.container{
+    display:flex;
+    flex-wrap:wrap;
+    align-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+.box {
+    flex-basis:1000px;
+    flex-grow:1;
+}
+.box1{
+    background-color: #6aefb7;
+    text-align: center;
+}
+.box2{
+    padding: 20px;
+    background-color: #6bfbd8;
+    font-size: x-large;
+    text-align: center;
+}
+.box3{
+    padding: 10px;
+    background-color: #6bfbd8;
+    flex-grow:3;
+    text-align: center;
+}
+.box4{
+    background-color: #6bfbd8;
+    flex-grow:4;
+    text-align: center;
+}
+.box5{
+    background-color: #4dfffe;
+    flex-grow:6;
+    text-align: center;
+}
+
+form {
+    text-align:center;
+}
+input[type=text] {
+    font-size: x-large;
+}
+input[type=password] {
+    font-size: large;
+}
+.buttonlogin{
+    width: 20em;  height: 3em;
+    color: #FFF;
+    background-color: #D90000;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 4px;
+}
+#nicki {
+    min-width: 350px;
+    min-height: auto;
+    margin: auto;
+    display: block;
+}
+#nicki {
+    min-width: 350px;
+    min-height: auto;
+    margin: auto;
+    display: block;
+}
+#queenb {
+    min-width: 350px;
+    min-height: auto;
+    margin: auto;
+    display: block;
+}
+
+/* END OF CSS for LOG IN */
+
+
+
+footer{
+    align-self: flex-end;
+}
+
+.test {
+    width: 50%;
+    text-align: center;
+    margin: auto;
+    display: block;
 }

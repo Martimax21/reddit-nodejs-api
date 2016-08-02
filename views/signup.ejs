@@ -1,26 +1,39 @@
-<html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="/stylin.css">
-    </head>
+<head>
+    <title> Sign up </title>
+    <link rel="stylesheet" type="text/css" href="/stylin.css">
+</head>
 
-    <div id="homepage">
-      <h1>Join Max & Jess's Reddit <i>today!</i></h1>
-        <h3>Just pick a username and password to sign up!</h3>
-        <form action="/signup" method="POST">
-            <div>
-                <input type="text" name="username" placeholder="Username">
-            </div>
-            <div>
-                <input type="password" name="password" placeholder="Password">
-            </div>
-            
-            <button type="submit">Sign up!</button>
-        </form>
-        <h3> Already a member? Log in :)</h3>
-        <div class="topnav">
-        <form action="/login" method="get">
-            <button type="submit">Log in</button>
-        </form>
-    </div>
-    </div>
+<body>
+    <% include partials/header %>
+            <main class="container">
+                <div class="box box1">
+                    <h1>Just pick a username and password to sign up!</h1>
+                </div>
+                <div class="box box2">
+                    <form action="/signup" method="POST">
+                        <div>
+                            <input type="text" name="username" placeholder="Username">
+                        </div>
+                        <div>
+                            <input type="password" name="password" placeholder="Password">
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg">Sign up!</button>
+                    </form>
+                </div>
+                <div class="box box3">
+                    <h3> Already a member? Log in :)</h3>
+                </div>
+                <div class="box box4">
+                    <form action="/login" method="get">
+                        <button type="submit" class="btn btn-warning">Log in</button>
+                    </form>
+                </div>
+                <div class="box box5">
+                    <img src="http://67.media.tumblr.com/951e1859a44640aa9ba3c82a8e5788e6/tumblr_mi2pckhaOu1rk3wp5o1_500.gif" id="queenb"/>
+                </div>
+            </main>
+            <footer>&copy; 2016 Jess & Max!</footer>
+</body>
+
 </html>

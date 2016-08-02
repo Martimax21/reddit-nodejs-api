@@ -1,0 +1,33 @@
+<head>
+    <title> Display comments </title>
+    <link rel="stylesheet" type="text/css" href="/stylin.css">
+</head>
+
+<body>
+    <% include partials/header %>
+    
+    <main>
+        <div id="allcomments">
+            <ol class="contents-list">
+                <h3 class="content-item__title">
+            COMMENTS </h3>
+                <% comments.forEach(function(comment) { %>
+                    <li class="content-item">
+                        <h3 class="content-item__title">
+                        COMMENTSSS </h3>
+                        <p>
+                            <%=comment.text %>
+                        </p>
+                        <p>Created by
+                            <%= comment.id %> on
+                                <%= dateFormat(comment.createAt, "yyyy-mm-dd h:MM:ss TT") %>
+                        </p>
+                    </li>
+                    <% }); %>
+            </ol>
+        </div>
+    </main>
+    <footer>&copy; 2016 Jess & Max!</footer>
+</body>
+
+</html>

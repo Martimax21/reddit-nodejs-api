@@ -1,30 +1,43 @@
+<head>
+    <title> Sign up </title>
+    <link rel="stylesheet" type="text/css" href="/stylin.css">
+</head>
 
-<html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="/stylin.css">
-    </head>
-
-    <div id="createPost">
-        <h2>To add a comment, please enter a URL and a title</h2>
-        <form action="/createPost" method="POST">
-            <div>
-                <input type="text" name="title" placeholder="Title">
+<body>
+    <% include partials/header %>
+        <main class="container">
+            <div class="box box1">
+                <h1>To add a comment, please enter a URL and a title</h1>
             </div>
-            <div>
-                <input type="text" name="url" placeholder="URL">
-            </div>
-            <div>
-                <!--<input type="text" name="subredditId" placeholder="SubredditId">-->
-                <select name="subredditDropDown"> 
+            <div class="box box2">
+                
+                <form class="test" action="/createPost" method="POST">
+                    <div>
+                        <input type="text" class="form-control" name="title" placeholder="Title">
+                    </div>
+                    <div>
+                        <input type="text" class="form-control" id="exampleInputEmail1" name="url" placeholder="URL">
+                    </div>
+                    <div>
+                        <!--<input type="text" name="subredditId" placeholder="SubredditId">-->
+                        <h4>Please pick a subreddit</h4>
+                        <select name="subredditDropDown" multiple class="form-control"> 
                 <% options = subs.map(function(subreddit) {
                       return  `<option value="${subreddit}">${subreddit}</option>`;
                     });
                  %>
                  <%- options.join("") %>
                 </select>
+                    </div>
+                    <button type="submit" class="btn btn-info btn-lg">Create your post!</button>
+                </form>
             </div>
-            <button type="submit">Create your post!</button>
-        </form>
-    </div>
-</html>
+            <div class="box box3">
+            </div>
+            <div class="box box5">
+                <img src="https://media.giphy.com/media/Qjy2ZcJNLs4Eg/giphy.gif" id="queenb" />
+            </div>
+        </main>
+        <footer>&copy; 2016 Jess & Max!</footer>
+</body>
 
