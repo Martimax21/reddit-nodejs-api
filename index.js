@@ -7,6 +7,8 @@ var dateFormat = require("dateformat");
 var cookieParser = require("cookie-parser");
 var secureRandom = require('secure-random');
 var engine = require('ejs-mate'); 
+var cheerio = require('cheerio');
+var npmrequest = require('request');
 // var sha1 = require("sha1");
 var del = function(req, res) { res.cookie('SESSION', "", {expires: new Date()}); res.redirect('/'); };
 
@@ -28,6 +30,14 @@ app.locals.dateFormat = dateFormat; //for date formatting in ejs file
 app.use(express.static(__dirname + '/public')); //for CSS file
 app.use(bodyParser.urlencoded({ extended: true })); //parsing posts
 app.use(cookieParser());
+
+require("jsdom").env("", function(err, window) {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    var $ = require("jquery")(window);
+});
 
 
 function checkLoginToken(request, response, next) {
@@ -150,6 +160,19 @@ app.get("/signup", function (req, res) {
   res.render("signup");
 });
 
+app.get("/suggestTitle", function (req, res) {
+  var url = req.query.url;
+  console.log("URL QUERY PARAM: "+url);
+  var title;
+  npmrequest(url, function (error, response, html) {
+      var $ = cheerio.load(html);
+      title = $('title').text();
+      console.log("TITLE INNER: "+ title);
+      res.send({success:true, title: title});
+  });
+  
+});
+
 app.post("/signup", function (req, res) {
   var username = req.body.username;
   var password = req.body.password; 
@@ -167,7 +190,7 @@ app.post("/signup", function (req, res) {
 });
 
 app.get("/createcomment", function (req, res) {
-  res.render("creatcomment", {postId: req.query.postId});
+  res.render("createcomment", {postId: req.query.postId});
 });
 
 app.post("/createcomment", function (req, res) {
@@ -220,7 +243,6 @@ app.post("/login", function(req, res) {
   }
 );
 });
-
 
 
 

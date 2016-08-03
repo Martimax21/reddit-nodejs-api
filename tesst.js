@@ -467,3 +467,10 @@
 // </body>
 
 // </html>
+
+
+// $(document).ready(function() {
+//     $("#suggesttitle").click(function(){
+//         $(".postTitle").text(".URL").
+//     })
+// })

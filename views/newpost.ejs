@@ -7,17 +7,21 @@
     <% include partials/header %>
         <main class="container">
             <div class="box box1">
-                <h1>To add a comment, please enter a URL and a title</h1>
+                <h1>Create your post</h1>
+                <h2>Please enter a URL, a title and a subbreddit</h2>
             </div>
             <div class="box box2">
                 
                 <form class="test" action="/createPost" method="POST">
                     <div>
-                        <input type="text" class="form-control" name="title" placeholder="Title">
+                        <input type="text" class="postTitle form-control" name="title" placeholder="Title">
                     </div>
                     <div>
-                        <input type="text" class="form-control" id="exampleInputEmail1" name="url" placeholder="URL">
-                    </div>
+                        <input type="text" class="urlInput form-control" name="urlInput" placeholder="URL">
+                    <div class = suggesttitle>
+                    <button class="btn btn-default btn-xs" id ="suggesttitle">Suggest Title</button>
+                        
+                    <div id="info"></div>
                     <div>
                         <!--<input type="text" name="subredditId" placeholder="SubredditId">-->
                         <h4>Please pick a subreddit</h4>

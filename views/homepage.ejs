@@ -6,6 +6,7 @@
 
     <link rel="stylesheet" type="text/css" href="/stylin.css">
     
+    
 </head>
 <% include partials/header %>
 
@@ -44,16 +45,17 @@
                     <article id="eachPost">
                         <section>
                             <li>
-                                <a class="title" href="<%= post.url %>"><%= post.title %></a>
-                                <% if(sort !== "newestRanking") { %>Score 
-                                <%= post[sort] %>
-                            <% } %>
-                                <p>Created by
+                                <a class="title" href="<%= post.url %>"><em><%= post.title %></em></a>
+                                <% if(sort !== "newestRanking") { %> <p><em>Score </em>
+                                <%= post[sort] %> </p>
+                                <% } %>
+                                <p><em>Created by</em>
                                     <%= post.user.username %> on
                                         <%= dateFormat(post.newestRanking, "yyyy-mm-dd h:MM:ss TT") %>
                                             in the Subreddit:
                                             <%= post.subreddit.name %>
                                 </p>
+                                <p>URL: <%= post.url%></p>
                                 <a href="/comments/:<%= post.id %>">
                                     <%= post.totalComments %> comments </a>
 
@@ -88,6 +90,7 @@
     </body>
 
 
-    <footer>&copy; 2016 myself!</footer>
-
+    <footer>&copy; 2016 myself! </footer>
+    
+    
 </html>

@@ -5,19 +5,27 @@
 
 <body>
     <% include partials/header %>
-    
-    <main>
-      <h1>We want YOUR <i>OPINION</i></h1>
-        <h3>Write your comment below and don't be rude</h3>
-        <form action="/createComment" method="POST">
-            <div>
-                <textarea name="commentText" id="comments" cols="25" rows="3"></textarea>
-                <input type="hidden" name="postId" value="<%= postId %>">
-                
+
+        <main class="container">
+            <div class="box box1">
+                <h1>We want YOUR <i>OPINION</i></h1>
             </div>
-            <button type="submit">Submit your comment!</button>
-        </form>
-    </main>
-    <footer>&copy; 2016 myself!</footer>
+            <div class="box box2">
+                <h3>Write your comment below and don't be rude</h3>
+
+            </div>
+            <div class="box box3">
+                <form  id="test" action="/createComment" method="POST">
+                    <textarea name="commentText" class="form-control" id="comments" cols="25" rows="3"></textarea>
+                    <input type="hidden" class="form-control" name="postId" value="<%= postId %>">
+                    <button class="btn btn-danger btn-lg">Submit your comment!</button>
+                </form>
+            </div>
+            <div class="box box5">
+                <img src="http://66.media.tumblr.com/tumblr_mdpm94z0kJ1qbypg1o1_500.gif" id="tyra" />
+            </div>
+        </main>
+        <footer>&copy; 2016 myself!</footer>
 </body>
+
 </html>
