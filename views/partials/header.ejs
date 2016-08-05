@@ -2,15 +2,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="/scripts/browser.js"></script>
+    <script src="/scripts/vote.js"></script>
 </head>
 
 <header class="clearfix">
         <nav id="topbuttons">
             <ul>
                 <li>
-                    <form action="/" method="get">
-                        <button class="btn btn-danger" type="submit">Homepage</button>
-                    </form>
+                    <a class="btn btn-danger" href="/">Homepage</a>
                 </li>
                 <li>
                     <form action="/del" method="post">
@@ -18,19 +17,13 @@
                     </form>
                 </li>
                 <li>
-                    <form action="/signup" method="get">
-                        <button class="btn btn-primary" type="submit">Sign up</button>
-                    </form>
+                    <a class="btn btn-primary" href="/signup">Sign up</a>
                 </li>
                 <li>
-                    <form action="/login" method="get">
-                        <button class="btn btn-primary" type="submit">Log in</button>
-                    </form>
+                    <a class="btn btn-primary" href="/login">Log in</a>
                 </li>
                 <li>
-                    <form action="/createPost" method="get">
-                        <button class="btn btn-success" type="submit">Create a post</button>
-                    </form>
+                    <a class="btn btn-primary" href="/createPost">Create a post</a>
                 </li>
             </ul>
         </nav>

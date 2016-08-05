@@ -31,14 +31,13 @@ app.use(express.static(__dirname + '/public')); //for CSS file
 app.use(bodyParser.urlencoded({ extended: true })); //parsing posts
 app.use(cookieParser());
 
-require("jsdom").env("", function(err, window) {
-    if (err) {
-        console.error(err);
-        return;
-    }
-    var $ = require("jquery")(window);
-});
-
+// require("jsdom").env("", function(err, window) {
+//     if (err) {
+//         console.error(err);
+//         return;
+//     }
+//     var $ = require("jquery")(window);
+// });
 
 function checkLoginToken(request, response, next) {
   if (request.cookies.SESSION) {
@@ -76,10 +75,9 @@ app.get('/createPost', function (req, res) {
   }
 });
 
-
 app.post('/createPost', function(req, res) {
   if (!req.loggedInUser) {
-    res.status(401).send('You must be logged in to create content!');
+    res.status(401).send('You must be logged in to create content....');
   }
   else {
     redditAPI.createPost({
@@ -92,20 +90,57 @@ app.post('/createPost', function(req, res) {
   )}
 })
 
+app.post("/createSub", function(req, res) {
+  
+    var sub = req.body;
+    if(!sub.description){
+      sub.description = "";
+    }
+    redditAPI.createSubreddit(sub, function (err, subreddit) {
+      if(err) {
+        res.send(err);
+      } else {
+        res.send({msg: "ok"});
+      }
+    })
+})
+
 app.post('/vote', function(req, res) {
   if (!req.loggedInUser) {
     res.status(401).send('You must be logged in to vote!');
   }
   else {
+    console.log(req.body);
     redditAPI.createOrUpdateVote({
-     userId: parseInt(req.loggedInUser[0].id),
-     postId: parseInt(req.body.postId),
-     vote: parseInt(req.body.vote)
-     }, function(err, vote) {
-      res.redirect('/');
+      userId: parseInt(req.loggedInUser[0].id),
+      postId: parseInt(req.body.postId),
+      vote: parseInt(req.body.vote)
+    }, function(err, vote) {
+          
+      if (err){
+            res.send(err);    
+      } else{
+        
+           redditAPI.getVotesForPost(req.body.postId, function(err, votes){
+            //it shoudl return a object that has two values total ups and total down;
+            //when you querry you get an array
+            // console.log(votes);
+            var upVotes = votes[0].upVotes,
+                downVotes = votes[0].downVotes,
+                postId = req.body.postId;
+            res.send({success: true, up: upVotes, down: downVotes, postId: postId});
+      });
+        
+          
+      };
+      
+   
+  
+     
     })
   }
 })
+
 app.post('/del', del);
 // app.post('/logout', function(req, res) {
 //     res.clearCookie(req.cookies.SESSION);
@@ -161,16 +196,13 @@ app.get("/signup", function (req, res) {
 });
 
 app.get("/suggestTitle", function (req, res) {
-  var url = req.query.url;
-  console.log("URL QUERY PARAM: "+url);
-  var title;
+  var url = "http://" + req.query.url;
   npmrequest(url, function (error, response, html) {
       var $ = cheerio.load(html);
-      title = $('title').text();
-      console.log("TITLE INNER: "+ title);
+      var title = $('title').text();
+      // console.log("TITLE INNER: "+ title);
       res.send({success:true, title: title});
   });
-  
 });
 
 app.post("/signup", function (req, res) {
@@ -210,13 +242,9 @@ app.post("/createcomment", function (req, res) {
   });
 });
 
-
-
 app.get("/login", function (req, res) {
     res.render("login", {message: req.query.message});
 });
-
-
 
 app.post("/login", function(req, res) {
   var username = req.body.username;

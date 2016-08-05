@@ -17,23 +17,43 @@
                         <input type="text" class="postTitle form-control" name="title" placeholder="Title">
                     </div>
                     <div>
-                        <input type="text" class="urlInput form-control" name="urlInput" placeholder="URL">
+                        <input type="text" class="urlInput form-control" name="url" placeholder="URL">
                     <div class = suggesttitle>
                     <button class="btn btn-default btn-xs" id ="suggesttitle">Suggest Title</button>
                         
                     <div id="info"></div>
                     <div>
                         <!--<input type="text" name="subredditId" placeholder="SubredditId">-->
+                       
                         <h4>Please pick a subreddit</h4>
-                        <select name="subredditDropDown" multiple class="form-control"> 
+                        <select name="subredditDropDown" multiple class="dropDown form-control"> 
                 <% options = subs.map(function(subreddit) {
                       return  `<option value="${subreddit}">${subreddit}</option>`;
                     });
                  %>
                  <%- options.join("") %>
-                </select>
-                    </div>
+                 </div>
+                     <div>
+                     </select>
+                     
+                     
+                         <h4>Can't find your the right subbreddit? </h4>
+                         <form id="subForm" >
+                            <div>
+                                <input type="text" class="createSub form-control" name="subreddit" placeholder="Subreddit name">
+                            </div>
+                            <div>
+                                <input type="text" class="createSubDesc form-control" name="subredditDesc" placeholder="Subreddit Description">
+                            </div>
+                                 <button id="buttonSub" class="btn btn-info btn-xs">Add subreddit</button>
+                        </form>
+                        
+                        
+                        <div id="testsub"></div>
+                        </div>
+                    <div>
                     <button type="submit" class="btn btn-info btn-lg">Create your post!</button>
+                    </div>
                 </form>
             </div>
             <div class="box box3">

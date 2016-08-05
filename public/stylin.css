@@ -69,6 +69,7 @@ body #homepage{
 #eachPost section{
     margin-left: 10px;
     font-size: 12px;
+    margin: 15px;
 }
 
 .vote{
@@ -177,22 +178,16 @@ input[type=text] {
     background-color: #438585;
     font-family: Arial, Helvetica, sans-serif;
 }
-input[type=password] {
-    
-}
+
 
 .navButtons:hover{
     background-color: #D90000;
-    color: #FFF;    
+    color: #FFF;
 }
-.title:link {
-    font-size: 15px;
-    font-weight: bold;
-    color:#1e496d;
-}
+
 p em{
     color: #140206;
-    font-size: 15px;
+    font-size: 1.5em;
     font-weight: bold;
 }
 a:link {
@@ -206,6 +201,19 @@ a:hover {
 }
 a:active{
     color: #3c948b;
+}
+.title:link {
+    font-weight: bold;
+    color:#286192;
+}
+.title:visited {
+    font-weight: bold;
+    color:#286192;
+}
+.title {
+    font-size: 1.6em;
+    font-weight: bold;
+    color:#286192;
 }
 
 ol {
@@ -281,11 +289,8 @@ input[type=password] {
     margin: auto;
     display: block;
 }
-#nicki {
-    min-width: 350px;
-    min-height: auto;
-    margin: auto;
-    display: block;
+.votingButtonStyle{
+    margin: 15px;
 }
 #queenb {
     min-width: 350px;

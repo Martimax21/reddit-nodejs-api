@@ -45,7 +45,7 @@
                     <article id="eachPost">
                         <section>
                             <li>
-                                <a class="title" href="<%= post.url %>"><em><%= post.title %></em></a>
+                                <a class="title" href="<%= post.url %>"><%= post.title %></a>
                                 <% if(sort !== "newestRanking") { %> <p><em>Score </em>
                                 <%= post[sort] %> </p>
                                 <% } %>
@@ -55,7 +55,6 @@
                                             in the Subreddit:
                                             <%= post.subreddit.name %>
                                 </p>
-                                <p>URL: <%= post.url%></p>
                                 <a href="/comments/:<%= post.id %>">
                                     <%= post.totalComments %> comments </a>
 
@@ -65,20 +64,22 @@
                                 </form>
                             </li>
                         </section>
-                        <div class="vote">
-                            <form action="/vote" method="post">
-                                <input type="hidden" name="vote" value="1">
-                                <input type="hidden" name="postId" value="<%= post.id %>">
-                                <p class="voteScore">
-                                    <%= post.numUpVotes %>
-                                        <button class="btn btn-primary btn-xs <%= post.yourVote===1 ? 'activeVote' : ''%>" type="submit">upvote</button></p>
+                        <div>
+                            <form class="voting">
+                                <input class="voteScore" type="hidden" name="vote" value="1">
+                                <input class="postId" type="hidden" name="postId" value="<%= post.id %>">
+                                <button id="upVote" class="btn btn-primary btn-xs <%= post.yourVote===1 ? 'activeVote' : ''%>">upvote</button>
+                                <p id="scoreUp_postId_<%=post.id%>">
+                                   <%=post.numUpVotes%>
+                                        </p>
                             </form>
-                            <form action="/vote" method="post">
-                                <input type="hidden" name="vote" value="-1">
-                                <input type="hidden" name="postId" value="<%= post.id %>">
-                                <p>
-                                    <%= post.numDownVotes%>
-                                        <button class="btn btn-primary btn-xs <%= post.yourVote===-1 ? 'activeVote' : ''%>" type="submit">downvote</button></p>
+                            <form class="voting" >
+                                <input class="voteScore" type="hidden" name="vote" value="-1">
+                                <input class="postId" type="hidden" name="postId" value="<%= post.id %>">
+                                 <button id="downVote" class="btn btn-primary btn-xs <%= post.yourVote===-1 ? 'activeVote' : ''%>">downvote</button>
+                                    <p id="scoreDown_postId_<%=post.id%>">
+                                        <%=post.numDownVotes%>
+                                    </p>
                             </form>
                         </div>
                     </article>

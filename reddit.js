@@ -560,6 +560,29 @@ module.exports = function RedditAPI(conn) {
       );
     
     },
+    getVotesForPost : function(postId, callback) {
+        conn.query(`
+          SELECT 
+            SUM(IF(vote = 1, 1, 0)) as upVotes,
+            SUM(IF(vote = -1, 1, 0)) as downVotes
+          FROM votes 
+          WHERE postId=?`, [postId],
+          function(err, totalvotes){
+            if (err) {
+              callback(err);
+            }
+            else {
+              var mappedVotes = totalvotes.map(function(votes) {
+              return {
+                upVotes: votes.upVotes,
+                downVotes: votes.downVotes
+                };
+              });
+              callback(null, mappedVotes);
+            }
+          }
+          );
+    },
     createOrUpdateVote: function(vote, callback) {
 
       if (vote.vote !== -1 && vote.vote !== 0 && vote.vote !== 1) {
